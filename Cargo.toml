@@ -1,0 +1,13 @@
+[package]
+name = "selfmqr"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+prometrics_sb = "0.1.2"
+tokio = { version = "1.40.0", features = ["full", "macros", "rt-multi-thread"] }
+futures-util = "0.3.30"
+lazy_static = "^1.4"
+axum = {version = "0.7.7", features = ["ws"]}
+tower = "0.5.1"
+serde_json = { version = "1.0.128", default-features = false, features = ["alloc"] }
