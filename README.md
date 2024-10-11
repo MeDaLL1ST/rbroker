@@ -1,6 +1,7 @@
 # self_msg_broker
 
-A rewritten version of the golang [message broker][https://github.com/MeDaLL1ST/MessageBroker] in rust
+A rewritten version of the golang message broker in rust
+https://github.com/MeDaLL1ST/MessageBroker
 
 ## Subscribing description
 

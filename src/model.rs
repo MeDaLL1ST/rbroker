@@ -50,12 +50,12 @@ impl Store {
     pub async fn get_updates(&self, key: String) -> (Receiver<String>, usize) {
 
         let mut uses_guard = self.uses.write().await;
+        let mut updates_guard = self.updates.write().await;
+
         let use_count = uses_guard.entry(key.clone()).or_insert(0);
         *use_count += 1;
 
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel(1);
-
-        let mut updates_guard = self.updates.write().await;
 
         let unique_id = *use_count;
 
@@ -72,11 +72,10 @@ impl Store {
     ///Decrementing key usage and clearing memory after all unsubscriptions
     pub async fn dec_key(&self, key: String, id: usize) {
         let mut uses_guard = self.uses.write().await;
+        let mut updates_guard = self.updates.write().await;
         if let Some(use_count) = uses_guard.get_mut(&key) {
             if *use_count > 0 {
                 *use_count -= 1;
-
-                let mut updates_guard = self.updates.write().await;
 
                 if let Some(queue) = updates_guard.get_mut(&key) {
                     if let Some(pos) = queue.iter().position(|(_, sender_id)| *sender_id == id) {
@@ -87,7 +86,6 @@ impl Store {
 
             if *use_count == 0 {
                 uses_guard.remove(&key);
-                let mut updates_guard = self.updates.write().await;
                 updates_guard.remove(&key);
             }
         }
@@ -95,6 +93,7 @@ impl Store {
     ///Getting the number of subscribers per key
     pub async fn info(&self, key: String) -> usize {
         let uses_guard = self.uses.read().await;
+        let _ = self.updates.read().await;
         if let Some(keyi) = uses_guard.get(&key) {
             *keyi
         } else {
@@ -104,6 +103,7 @@ impl Store {
     ///Getting all keys with existing subscribers
     pub async fn list(&self) -> Vec<String> {
         let updates_guard = self.updates.read().await;
+        let _ = self.uses.read().await;
         let keys: Vec<String> = updates_guard.keys().cloned().collect();
         keys
     }
