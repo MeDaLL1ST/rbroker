@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selfmqr-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selfmqr
+  template:
+    metadata:
+      labels:
+        app: selfmqr
+    spec:
+      containers:
+      - name: selfmqr
+        image: registry/selfmqr:latest
+        ports:
+        - containerPort: ${PORT}
+        envFrom:
+        - configMapRef:
+            name: selfmqr-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selfmqr-service
+spec:
+  selector:
+    app: selfmqr
+  ports:
+    - protocol: TCP
+      port: ${PORT}
+      targetPort: ${PORT}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: selfmqr-config
+data:
+  PORT: "8080"
