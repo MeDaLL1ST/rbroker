@@ -93,19 +93,12 @@ impl Store {
     ///Getting the number of subscribers per key
     pub async fn info(&self, key: String) -> usize {
         let uses_guard = self.uses.read().await;
-        let _ = self.updates.read().await;
-        if let Some(keyi) = uses_guard.get(&key) {
-            *keyi
-        } else {
-            0
-        }
+        *uses_guard.get(&key).unwrap_or(&0)
     }
     ///Getting all keys with existing subscribers
     pub async fn list(&self) -> Vec<String> {
-        let updates_guard = self.updates.read().await;
-        let _ = self.uses.read().await;
-        let keys: Vec<String> = updates_guard.keys().cloned().collect();
-        keys
+        let uses_guard = self.uses.read().await;
+        uses_guard.keys().cloned().collect()
     }
 }
 
